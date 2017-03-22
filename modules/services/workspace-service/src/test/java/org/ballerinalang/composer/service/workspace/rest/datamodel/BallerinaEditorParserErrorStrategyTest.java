@@ -62,7 +62,7 @@ public class BallerinaEditorParserErrorStrategyTest {
             BLangModelBuilder bLangModelBuilder = new BLangModelBuilder(packageBuilder, StringUtils.EMPTY);
 
             BLangAntlr4Listener ballerinaBaseListener = new BLangAntlr4Listener(bLangModelBuilder);
-            ballerinaBaseListener.setComposerMode(true);
+            ballerinaBaseListener.setVerboseMode(true);
             ballerinaParser.addParseListener(ballerinaBaseListener);
             ballerinaParser.compilationUnit();
             BallerinaFile bFile = bLangModelBuilder.build();

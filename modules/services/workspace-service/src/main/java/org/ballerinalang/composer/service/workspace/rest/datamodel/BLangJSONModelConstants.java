@@ -265,4 +265,6 @@ public class BLangJSONModelConstants {
     public static final String CATCH_BLOCK = "catch_block";
 
     public static final String THROW_STATEMENT = "throw_statement";
+
+    public static final String WHITE_SPACE_DESCRIPTOR = "white_space_descriptor";
 }

@@ -11,3 +11,12 @@ import          ballerina.lang.system      as         test     ;
 
 import          ballerina.lang.messages           ;
 
+
+
+service test
+{
+
+        resource test( ) {    }
+  }
+
+

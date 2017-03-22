@@ -45,6 +45,8 @@ import org.ballerinalang.model.Resource;
 import org.ballerinalang.model.Service;
 import org.ballerinalang.model.StructDef;
 import org.ballerinalang.model.VariableDef;
+import org.ballerinalang.model.WhiteSpaceDescriptor;
+import org.ballerinalang.model.WhiteSpaceRegion;
 import org.ballerinalang.model.Worker;
 import org.ballerinalang.model.expressions.ActionInvocationExpr;
 import org.ballerinalang.model.expressions.AddExpression;
@@ -96,6 +98,8 @@ import org.ballerinalang.model.statements.WhileStmt;
 import org.ballerinalang.model.statements.WorkerInvocationStmt;
 import org.ballerinalang.model.statements.WorkerReplyStmt;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Stack;
 import java.util.function.BiConsumer;
 
@@ -132,6 +136,7 @@ public class BLangJSONModelBuilder implements NodeVisitor {
         JsonObject pkgDefine = new JsonObject();
         pkgDefine.addProperty(BLangJSONModelConstants.DEFINITION_TYPE, BLangJSONModelConstants.PACKAGE_DEFINITION);
         pkgDefine.addProperty(BLangJSONModelConstants.PACKAGE_NAME, bFile.getPackagePath());
+        pkgDefine.add(BLangJSONModelConstants.WHITE_SPACE_DESCRIPTOR, whiteSpaceDescriptorToJson(bFile.getWhiteSpaceDescriptor()));
         tempJsonArrayRef.peek().add(pkgDefine);
 
         //import declarations
@@ -186,6 +191,7 @@ public class BLangJSONModelBuilder implements NodeVisitor {
         importObj.addProperty(BLangJSONModelConstants.DEFINITION_TYPE, BLangJSONModelConstants.IMPORT_DEFINITION);
         importObj.addProperty(BLangJSONModelConstants.IMPORT_PACKAGE_NAME, importPackage.getName());
         importObj.addProperty(BLangJSONModelConstants.IMPORT_PACKAGE_PATH, importPackage.getPath());
+        importObj.add(BLangJSONModelConstants.WHITE_SPACE_DESCRIPTOR, whiteSpaceDescriptorToJson(importPackage.getWhiteSpaceDescriptor()));
         this.addPosition(importObj, importPackage.getNodeLocation());
         tempJsonArrayRef.peek().add(importObj);
     }
@@ -226,6 +232,8 @@ public class BLangJSONModelBuilder implements NodeVisitor {
 //            }
 //        }
         serviceObj.add(BLangJSONModelConstants.CHILDREN, tempJsonArrayRef.peek());
+        serviceObj.add(BLangJSONModelConstants.WHITE_SPACE_DESCRIPTOR,
+                whiteSpaceDescriptorToJson(service.getWhiteSpaceDescriptor()));
         tempJsonArrayRef.pop();
         tempJsonArrayRef.peek().add(serviceObj);
     }
@@ -309,6 +317,8 @@ public class BLangJSONModelBuilder implements NodeVisitor {
         if(resource.getResourceBody() != null) {
             resource.getResourceBody().accept(this);
         }
+        resourceObj.add(BLangJSONModelConstants.WHITE_SPACE_DESCRIPTOR,
+                whiteSpaceDescriptorToJson(resource.getWhiteSpaceDescriptor()));
         resourceObj.add(BLangJSONModelConstants.CHILDREN, tempJsonArrayRef.peek());
         tempJsonArrayRef.pop();
         tempJsonArrayRef.peek().add(resourceObj);
@@ -1383,6 +1393,14 @@ public class BLangJSONModelBuilder implements NodeVisitor {
         if (nodeLocation != null) {
             jsonObj.addProperty(BLangJSONModelConstants.LINE_NUMBER, String.valueOf(nodeLocation.getLineNumber()));
         }
+    }
+
+    private JsonObject whiteSpaceDescriptorToJson(WhiteSpaceDescriptor whiteSpaceDescriptor){
+        JsonObject object = new JsonObject();
+        for (Map.Entry<Integer, WhiteSpaceRegion> regionEntry : whiteSpaceDescriptor.getWhiteSpaceRegions().entrySet()) {
+            object.addProperty(regionEntry.getKey().toString(), regionEntry.getValue().getWhiteSpace());
+        }
+        return object;
     }
 
 }

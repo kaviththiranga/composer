@@ -27,6 +27,7 @@ import org.ballerinalang.model.BLangPackage;
 import org.ballerinalang.model.BallerinaFile;
 import org.ballerinalang.model.GlobalScope;
 import org.ballerinalang.model.builder.BLangModelBuilder;
+import org.ballerinalang.model.builder.BLangVerboseModelBuilder;
 import org.ballerinalang.model.types.BTypes;
 import org.ballerinalang.natives.BuiltInNativeConstructLoader;
 import org.ballerinalang.util.parser.BallerinaLexer;
@@ -35,12 +36,13 @@ import org.ballerinalang.util.parser.antlr4.BLangAntlr4Listener;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class BallerinaModelWithWhitespaceTest {
 
-    public static void main(String[] args) {
-        try {
+    public static void main(String[] args) throws IOException {
             File file = new File(BallerinaModelWithWhitespaceTest.class.getClassLoader().getResource("samples/parser/captureWhitespaceBal.bal")
                     .getFile());
             InputStream stream = new FileInputStream(file);
@@ -56,9 +58,10 @@ public class BallerinaModelWithWhitespaceTest {
             BTypes.loadBuiltInTypes(globalScope);
             BLangPackage bLangPackage = new BLangPackage(globalScope);
             BLangPackage.PackageBuilder packageBuilder = new BLangPackage.PackageBuilder(bLangPackage);
-            BallerinaComposerModelBuilder bLangModelBuilder = new BallerinaComposerModelBuilder(packageBuilder, StringUtils.EMPTY);
+            BLangVerboseModelBuilder bLangModelBuilder = new BLangVerboseModelBuilder(packageBuilder, StringUtils.EMPTY);
 
             BLangAntlr4Listener ballerinaBaseListener = new BLangAntlr4Listener(ballerinaToken, bLangModelBuilder);
+            ballerinaBaseListener.setVerboseMode(true);
             ballerinaParser.addParseListener(ballerinaBaseListener);
             ballerinaParser.compilationUnit();
 
@@ -72,9 +75,5 @@ public class BallerinaModelWithWhitespaceTest {
 
             String responseString = response.toString();
             System.out.println(responseString);
-        } catch (Exception ex) {
-            String error = ex.getMessage();
-            System.out.println(error);
-        }
     }
 }
