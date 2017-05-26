@@ -60,7 +60,9 @@ public class BLangJSONModelConstants {
     public static final String IMPORT_PACKAGE_NAME = "import_package_name";
 
     public static final String IMPORT_PACKAGE_PATH = "import_package_path";
-    
+
+    public static final String IMPORT_AS_NAME = "import_as_name";
+
     public static final String CONSTANT_DEFINITION = "constant_definition";
     
     public static final String CONSTANT_DEFINITION_BTYPE = "constant_definition_btype";
