@@ -44,6 +44,14 @@ class AnnotationEntry extends ASTNode {
          * @type {string|Annotation|AnnotationEntryArray}
          */
         this._rightValue = _.get(args, 'rightValue');
+
+        this.whiteSpace.defaultDescriptor.regions = {
+            0: ' ',
+            1: '',
+            2: ' ',
+            3: ' ',
+            4: ''
+        };
     }
 
     setLeftValue(leftValue, options) {
@@ -69,13 +77,20 @@ class AnnotationEntry extends ASTNode {
     toString() {
         let annotationEntryAsString;
         if (_.isString(this._rightValue)) {
-            annotationEntryAsString = this._rightValue;
+            annotationEntryAsString = this.getWSRegion(3) + this._rightValue
+                    + this.getWSRegion(4);
         } else {
-            annotationEntryAsString = this._rightValue.toString();
+            if (this.getFactory().isAnnotationEntryArray(this._rightValue)) {
+                annotationEntryAsString = this.getWSRegion(3) + this._rightValue.toString()
+                  + this.getWSRegion(4);
+            } else {
+                annotationEntryAsString = this.getWSRegion(3) + this._rightValue.toString();
+            }
         }
 
         if (!_.isUndefined(this._leftValue) && !_.isEmpty(this._leftValue)) {
-            return this._leftValue + ': ' + annotationEntryAsString;
+            return this.getWSRegion(0) + this._leftValue +  this.getWSRegion(1)
+                    +  ':' + annotationEntryAsString;
         } else {
             return annotationEntryAsString;
         }
