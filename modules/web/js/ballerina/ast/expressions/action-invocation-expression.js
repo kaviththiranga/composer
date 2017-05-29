@@ -33,6 +33,20 @@ class ActionInvocationExpression extends Expression {
         this._arguments = _.get(args, "arguments", []);
         this._connector = _.get(args, 'connector');
         this._fullPackageName = _.get(args, 'fullPackageName', undefined);
+        this.whiteSpace.defaultDescriptor.regions = {
+            0: '',
+            1: '',
+            2: '',
+            3: ''
+        };
+        this.whiteSpace.defaultDescriptor.children = {
+            nameRef: {
+                0: ' ',
+                1: '',
+                2: '',
+                3: ''
+            }
+        };
         //create the default expression for action invocation
         this.setExpression(this.generateExpression());
         this.type = "ActionInvocationExpression";
@@ -197,10 +211,13 @@ class ActionInvocationExpression extends Expression {
             }
         }
 
-        var expression = this.getActionConnectorName() + '.' + this.getActionName() + '(' + argsString +  ')';
+        var expression = this.getActionConnectorName() + this.getWSRegion(1)
+                + '.' + this.getWSRegion(2) + this.getActionName() + this.getWSRegion(3)
+                + '(' + argsString +  ')' + this.getWSRegion(4);
         if(!_.isUndefined(this.getActionPackageName()) && !_.isNil(this.getActionPackageName())
                 && !_.isEqual(this.getActionPackageName(), 'Current Package')){
-            expression = this.getActionPackageName() + ":" + expression;
+            expression = this.getActionPackageName() + this.getChildWSRegion('nameRef', 1) + ":"
+                        + this.getChildWSRegion('nameRef', 2) + expression;
         }
         return expression;
     }
