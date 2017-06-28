@@ -181,6 +181,14 @@ public class BLangFileRestService {
         BLangAntlr4Listener ballerinaBaseListener = new BLangAntlr4Listener(bLangModelBuilder, filePath);
         ballerinaParser.addParseListener(ballerinaBaseListener);
         ballerinaParser.compilationUnit();
+        BallerinaFile build = bLangModelBuilder.build();
+
+        try {
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+            build.accept(semanticAnalyzer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         JsonArray errors = new JsonArray();
 
