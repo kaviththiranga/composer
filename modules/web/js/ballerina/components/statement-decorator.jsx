@@ -62,7 +62,12 @@ class StatementDecorator extends React.PureComponent {
         this.setActionVisibilityFalse = this.setActionVisibility.bind(this, false);
         this.setActionVisibilityTrue = this.setActionVisibility.bind(this, true);
 
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onDragStop = this.onDragStop.bind(this);
+        this.onDragMove = this.onDragMove.bind(this);
+
         this.state = {
+            dragging: false,
             innerDropZoneActivated: false,
             innerDropZoneDropNotAllowed: false,
             innerDropZoneExist: false,
@@ -186,7 +191,7 @@ class StatementDecorator extends React.PureComponent {
      */
     setActionVisibility(show) {
         if (!this.context.dragDropManager.isOnDrag()) {
-            if (show) {
+            if (show && !this.state.dragging) {
                 this.context.activeArbiter.readyToActivate(this);
             } else {
                 this.context.activeArbiter.readyToDeactivate(this);
@@ -200,7 +205,7 @@ class StatementDecorator extends React.PureComponent {
     openEditor() {
         const options = this.props.editorOptions;
         const packageScope = this.context.renderingContext.packagedScopedEnvironemnt;
-        if (options) {
+        if (options && !this.state.dragging) {
             new ExpressionEditor(this.state.statementBox,
                 text => this.onUpdate(text), options, packageScope).render(this.context.container);
         }
@@ -278,6 +283,7 @@ class StatementDecorator extends React.PureComponent {
         return (
             <g
                 className="statement"
+                onMouseDown={e => this.onMouseDown(e)}
                 onMouseOut={this.setActionVisibilityFalse}
                 onMouseOver={this.setActionVisibilityTrue}
                 ref={(group) => {
@@ -295,9 +301,9 @@ class StatementDecorator extends React.PureComponent {
                     onMouseOut={this.onDropZoneDeactivate}
                 />
                 <rect
-                    x={bBox.x}
+                    x={this.state.statementBox.x}
                     y={this.state.statementBox.y}
-                    width={bBox.w}
+                    width={this.state.statementBox.w}
                     height={this.state.statementBox.h}
                     className={statementRectClass}
                     onClick={e => this.openEditor(e)}
@@ -323,6 +329,39 @@ class StatementDecorator extends React.PureComponent {
             </g>);
     }
 
+    /**
+     * mouse down handler on statement decorator group
+     * @param {*} evt Mouse Event
+     */
+    onMouseDown(evt) {
+        this.setState({ dragging: true });
+        document.addEventListener('mouseup', this.onDragStop);
+        document.addEventListener('mousemove', this.onDragMove);
+    }
+
+    /**
+     * mouse up handler on statement decorator group
+     * @param {*} evt Native event
+     */
+    onDragStop(evt) {
+        this.setState({ dragging: false });
+        document.removeEventListener('mouseup', this.onDragStop);
+        //document.removeEventListener('mouseout', this.onDragStop);
+        document.removeEventListener('mousemove', this.onDragMove);
+        console.log('ssssssssssssssssssssssssssssssssssssss');
+    }
+
+    /**
+     * mouse move handler on statement decorator group
+     * @param {*} evt Native event
+     */
+    onDragMove(evt) {
+        let stmtBox = this.state.statementBox;
+        stmtBox.x = stmtBox.x + evt.movementX;
+        stmtBox.y = stmtBox.y + evt.movementY;
+        this.setState({statementBox: stmtBox});
+        console.log(evt);
+    }
 }
 
 StatementDecorator.defaultProps = {
