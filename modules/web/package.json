@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.2.6",
-    "antlr4": "^4.6.0",
+    "antlr4": "^4.7.0",
     "axios": "^0.16.2",
     "babel-core": "^6.23.1",
     "babel-loader": "^6.3.2",
