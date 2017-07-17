@@ -26,12 +26,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.composer.service.workspace.common.Utils;
 import org.ballerinalang.model.BLangPackage;
+import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.model.BallerinaFile;
 import org.ballerinalang.model.GlobalScope;
-import org.ballerinalang.model.types.BTypes;
+import org.ballerinalang.model.NativeScope;
 import org.ballerinalang.util.parser.BallerinaLexer;
 import org.ballerinalang.util.parser.BallerinaParser;
 import org.ballerinalang.util.parser.antlr4.BLangAntlr4Listener;
+import org.ballerinalang.util.program.BLangPrograms;
+import org.ballerinalang.util.repository.BuiltinPackageRepository;
+import org.ballerinalang.util.semantics.SemanticAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,6 +166,15 @@ public class BLangFileRestService {
      * @throws IOException
      */
     private JsonObject validate(InputStream stream, java.nio.file.Path filePath) throws IOException {
+        // Get the global scope
+        GlobalScope globalScope = BLangPrograms.populateGlobalScope();
+        NativeScope nativeScope = BLangPrograms.populateNativeScope();
+
+        BuiltinPackageRepository[] builtinPkgRepositories = BLangPrograms.populateBuiltinPackageRepositories();
+
+        // Creates program scope for this Ballerina program
+        BLangProgram bLangProgram = new BLangProgram(globalScope, nativeScope, BLangProgram.Category.SERVICE_PROGRAM);
+        bLangProgram.setProgramFilePath(filePath);
 
         ANTLRInputStream antlrInputStream = new ANTLRInputStream(stream);
         BallerinaLexer ballerinaLexer = new BallerinaLexer(antlrInputStream);
@@ -171,8 +184,6 @@ public class BLangFileRestService {
         BallerinaComposerErrorStrategy errorStrategy = new BallerinaComposerErrorStrategy();
         ballerinaParser.setErrorHandler(errorStrategy);
 
-        GlobalScope globalScope = GlobalScope.getInstance();
-        BTypes.loadBuiltInTypes(globalScope);
         BLangPackage bLangPackage = new BLangPackage(globalScope);
         BLangPackage.PackageBuilder packageBuilder = new BLangPackage.PackageBuilder(bLangPackage);
 
@@ -194,6 +205,15 @@ public class BLangFileRestService {
 
         JsonObject result = new JsonObject();
         result.add("errors", errors);
+
+        // if no syntax errors are found
+        // try to find semantic errors
+        if (errors.size() == 0) {
+            JsonArray semanticErrors = new JsonArray();
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(bLangProgram);
+            // TODO Implement logic for catching semantic exceptions here
+            result.add("semanticErrors", semanticErrors);
+        }
 
         return result;
     }
