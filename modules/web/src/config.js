@@ -9,7 +9,6 @@ export default {
         plugins: [
             BallerinaPlugin,
             DebuggerPlugin,
-            HelpPlugin,
         ],
     },
     // provide plugin specific configs - if any.

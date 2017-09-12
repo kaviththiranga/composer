@@ -64,7 +64,7 @@ class SuggestionsText extends React.Component {
     }
 
     componentWillUnmount() {
-        ReactDOM.render(<noscript />, this.context.getOverlayContainer());
+       // ReactDOM.render(<noscript />, this.context.getOverlayContainer());
     }
 
     onChange(event, { newValue, method }) {

@@ -31,14 +31,30 @@ class EditorTabs extends View {
         this.onOpenFileInEditor = this.onOpenFileInEditor.bind(this);
         this.onOpenCustomEditorTab = this.onOpenCustomEditorTab.bind(this);
 
-        const { command, pref: { history } } = this.props.editorPlugin.appContext;
+        const { pref: { history } } = this.props.editorPlugin.appContext;
 
         this.state = {
             activeEditorID: history.get(HISTORY.ACTIVE_EDITOR),
             openedEditors: [],
         };
+    }
+
+    /**
+     * @inheritdoc
+     */
+    componentDidMount() {
+        const { command } = this.props.editorPlugin.appContext;
         command.on(COMMANDS.OPEN_FILE_IN_EDITOR, this.onOpenFileInEditor);
         command.on(COMMANDS.OPEN_CUSTOM_EDITOR_TAB, this.onOpenCustomEditorTab);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    componentWillUnmount() {
+        const { command } = this.props.editorPlugin.appContext;
+        command.off(COMMANDS.OPEN_FILE_IN_EDITOR, this.onOpenFileInEditor);
+        command.off(COMMANDS.OPEN_CUSTOM_EDITOR_TAB, this.onOpenCustomEditorTab);
     }
 
     /**

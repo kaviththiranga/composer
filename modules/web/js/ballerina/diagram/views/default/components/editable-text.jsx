@@ -50,7 +50,7 @@ class EditableText extends React.Component {
     }
 
     componentWillUnmount() {
-        ReactDOM.render(<noscript />, this.context.getOverlayContainer());
+        //ReactDOM.render(<noscript />, this.context.getOverlayContainer());
     }
 
     renderTextBox() {
