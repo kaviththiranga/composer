@@ -33,6 +33,7 @@ onmessage = (event) => {
                 fileName,
                 filePath,
                 content,
+                includeProgramDir: true,
             };
             const headers = {
                 'content-type': 'application/json; charset=utf-8',
