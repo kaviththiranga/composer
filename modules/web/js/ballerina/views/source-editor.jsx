@@ -26,7 +26,7 @@ import debuggerHoc from 'src/plugins/debugger/views/DebuggerHoc';
 import File from './../../../src/core/workspace/model/file';
 import SourceViewCompleterFactory from './../../ballerina/utils/source-view-completer-factory';
 import { getLangServerClientInstance } from './../../langserver/lang-server-client-controller';
-import { CHANGE_EVT_TYPES } from './constants';
+import { CHANGE_EVT_TYPES, WORKER_MESSAGE_TYPES } from './constants';
 import { CONTENT_MODIFIED } from './../../constants/events';
 import { GO_TO_POSITION } from './../../constants/commands';
 
@@ -61,13 +61,23 @@ class NotifyingUndoManager extends AceUndoManager {
     }
     execute(args) {
         super.execute(args);
+        const { file: { name, extension, path } } = this.sourceView.props;
+        const content = this.sourceView.editor.session.getValue();
+        this.sourceView.validationWorker.postMessage({
+            type: WORKER_MESSAGE_TYPES.VALIDATION_REQUEST,
+            args: {
+                fileName: name + '.' + extension,
+                filePath: path,
+                content,
+            },
+        });
         if (!this.sourceView.skipFileUpdate) {
             const changeEvent = {
                 type: CHANGE_EVT_TYPES.SOURCE_MODIFIED,
                 title: 'Modify source',
             };
             this.sourceView.props.file
-                .setContent(this.sourceView.editor.session.getValue(), changeEvent);
+                .setContent(content, changeEvent);
         }
         this.sourceView.skipFileUpdate = false;
     }
@@ -84,6 +94,7 @@ class SourceEditor extends React.Component {
         this.goToCursorPosition = this.goToCursorPosition.bind(this);
         this.onFileContentChanged = this.onFileContentChanged.bind(this);
         this.lastUpdatedTimestamp = props.file.lastUpdated;
+        this.validationWorker = new Worker('dist/validation-worker.js');
     }
 
     /**
@@ -162,6 +173,25 @@ class SourceEditor extends React.Component {
                 });
                 this.props.onLintErrors(errors);
             });
+            this.validationWorker.onmessage = (evt) => {
+                const { data: { type, args: { errors } } } = evt;
+                if (type === WORKER_MESSAGE_TYPES.VALIDATION_RESPONSE) {
+                    if (!_.isNil(errors) && _.isArray(errors)) {
+                        errors.forEach((syntaxError) => {
+                            // ace's rows start from zero, but parser begins from 1
+                            syntaxError.row -= 1;
+                        });
+                        editor.getSession().setAnnotations(errors);
+                    } else {
+                        // no new errors or something wrong with validator. clear up current errors
+                        editor.getSession().clearAnnotations();
+                    }
+                }
+            };
+            this.validationWorker.onerror = (error) => {
+                log.error('Error while validating content', error);
+                editor.getSession().clearAnnotations();
+            };
         }
     }
 

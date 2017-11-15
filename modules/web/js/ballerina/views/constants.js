@@ -33,4 +33,9 @@ export const CLASSES = {
     },
 };
 
+export const WORKER_MESSAGE_TYPES = {
+    VALIDATION_REQUEST: 'validation-request',
+    VALIDATION_RESPONSE: 'validation-response',
+};
+
 export const TOOL_PALETTE_WIDTH = 243;

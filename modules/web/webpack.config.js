@@ -31,7 +31,7 @@ let exportConfig = {};
 const config = [{
     entry: {
         bundle: './src/index.js',
-        'worker-ballerina': './js/ballerina/utils/ace-worker.js',
+        'validation-worker': './js/ballerina/utils/validation-worker.js',
     },
     output: {
         filename: '[name].js',

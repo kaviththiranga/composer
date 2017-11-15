@@ -25,7 +25,6 @@ ace.define('ace/mode/ballerina',
         const oop = acequire('ace/lib/oop');
         const JavaScriptMode = acequire('ace/mode/javascript').Mode;
         const TextHighlightRules = acequire('ace/mode/text_highlight_rules').TextHighlightRules;
-        const WorkerClient = acequire('ace/worker/worker_client').UIWorkerClient;
 
         const BallerinaHighlightRules = function () {
             const keywordMapper = this.createKeywordMapper({
@@ -63,30 +62,6 @@ ace.define('ace/mode/ballerina',
         const BallerinaMode = function () {
             JavaScriptMode.call(this);
             this.HighlightRules = BallerinaHighlightRules;
-
-            this.createWorker = function (session) {
-                const worker = new WorkerClient(['ace/aceb'], 'ace/worker/ballerina', 'WorkerModule');
-                worker.attachToDocument(session.getDocument());
-
-                worker.on('lint', (results) => {
-                    if (!_.isNil(results.data) && _.isArray(results.data)) {
-                        results.data.forEach((syntaxError) => {
-                            // ace's rows start from zero, but parser begins from 1
-                            syntaxError.row -= 1;
-                        });
-                        session.setAnnotations(results.data);
-                    } else {
-                        // no new errors or something wrong with validator. clear up current errors
-                        session.clearAnnotations();
-                    }
-                });
-
-                worker.on('terminate', () => {
-                    session.clearAnnotations();
-                });
-
-                return worker;
-            };
         };
 
         // inherit from javascript mode
