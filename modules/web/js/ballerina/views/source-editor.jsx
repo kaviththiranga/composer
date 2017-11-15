@@ -61,21 +61,13 @@ class NotifyingUndoManager extends AceUndoManager {
     }
     execute(args) {
         super.execute(args);
-        const { file: { name, extension, path } } = this.sourceView.props;
-        const content = this.sourceView.editor.session.getValue();
-        this.sourceView.validationWorker.postMessage({
-            type: WORKER_MESSAGE_TYPES.VALIDATION_REQUEST,
-            args: {
-                fileName: name + '.' + extension,
-                filePath: path,
-                content,
-            },
-        });
+        this.sourceView.validate();
         if (!this.sourceView.skipFileUpdate) {
             const changeEvent = {
                 type: CHANGE_EVT_TYPES.SOURCE_MODIFIED,
                 title: 'Modify source',
             };
+            const content = this.sourceView.editor.session.getValue();
             this.sourceView.props.file
                 .setContent(content, changeEvent);
         }
@@ -192,6 +184,7 @@ class SourceEditor extends React.Component {
                 log.error('Error while validating content', error);
                 editor.getSession().clearAnnotations();
             };
+            this.validate();
         }
     }
 
@@ -220,6 +213,22 @@ class SourceEditor extends React.Component {
         if (this.props.file.id === args.file.id) {
             this.goToCursorPosition(args.row, args.column);
         }
+    }
+
+    /**
+     * Validate in background
+     */
+    validate() {
+        const { file: { name, extension, path } } = this.props;
+        const content = this.editor.session.getValue();
+        this.validationWorker.postMessage({
+            type: WORKER_MESSAGE_TYPES.VALIDATION_REQUEST,
+            args: {
+                fileName: name + '.' + extension,
+                filePath: path,
+                content,
+            },
+        });
     }
 
     /**
