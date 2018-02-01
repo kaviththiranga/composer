@@ -35,4 +35,7 @@ public class ServerCommand {
 
     @Parameter(names = "--debug", hidden = true)
     private String debugPort;
+
+    @Parameter(names = "--skipOpenInBrowser")
+    public boolean skipOpenInBrowser = false;
 }

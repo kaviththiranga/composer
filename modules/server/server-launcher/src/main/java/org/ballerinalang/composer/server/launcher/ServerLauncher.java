@@ -140,7 +140,9 @@ public class ServerLauncher {
             String uRL = "http://" + config.getHost() + ":" + config.getPort();
             PrintStream out = System.out;
             out.println("Composer started successfully at " + uRL);
-            BrowserLauncher.startInDefaultBrowser(uRL);
+            if (!cmdLineArgs.skipOpenInBrowser) {
+                BrowserLauncher.startInDefaultBrowser(uRL);
+            }
         } catch (Exception e) {
             logger.error("Error while starting Composer Backend Server.", e);
         }
