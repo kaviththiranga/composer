@@ -1,0 +1,1 @@
+## composer configured to run on browsers

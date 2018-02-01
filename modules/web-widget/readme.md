@@ -1,0 +1,1 @@
+## composer configured to run as a widget in web page
